@@ -1,0 +1,49 @@
+<html>
+
+<head>
+  <head>
+    <script type="text/javascript" src="KASClient.js"></script>
+    <script type="text/javascript">
+        var _form; // type: KASForm
+
+        // Below will be called on onload of CreationView.html
+        function onCreatePageLoad() {
+            KASClient.Form.initFormAsync (function (form, error) {
+                if (error != null) {
+                    showAlert("Error:initFormAsync:" + error);
+                    return;
+                }
+                _form = form;
+            });
+        }
+
+        function submitData() {
+            var description = document.getElementById("description").value;
+            if (description == null || description == "") {
+                KASClient.App.showNativeErrorMessage("Please enter the details for what you would like feedback on.");
+            } else {
+                // Set the description to form title
+                _form.title = description;
+
+                // Finally send the request
+                KASClient.Form.submitFormRequest(_form);
+            }
+        }
+    </script>
+</head>
+</head>
+
+<body onload="onCreatePageLoad()">
+    <br/> <br/>
+    <div>
+        <p>What would you like feedback on?</p>
+        <br/> <br/>
+        <input type="text" name="description" id="description" placeholder="Enter question text here" value="">
+    </div>
+    <br/> <br/>
+    <div>
+        <input type="submit" name="submit" value="Submit" onclick="submitData()">
+    </div>
+</body>
+
+</html>
