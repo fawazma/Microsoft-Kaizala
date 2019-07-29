@@ -1,0 +1,27 @@
+{
+    "id": "A4222-B4112-C8228-D5132-E7678",
+    "schemaVersion": 1,
+    "version": 1,
+    "minorVersion": 1,
+    "providerName": "Medical Services",
+    "displayName": "Medical requesting Action",
+    "actionScope": "Group",
+    "description":"V2 Hospital",
+    "icon": "icon.png",
+    "appModel": "appModel.json",
+    "views": {
+              "CreationView": {
+                  "labelHeader": "V2 Hospital",
+                  "sourceLocation": "ResponseView.html"
+              },
+              "ChatCanvasCardView": {
+                  "labelResponded": "You have submitted your request.",
+                  "labelRespondToForm": "TENDER REQUEST",
+                  "isResponseEditable": true
+              },
+              "ResponseResultsView": {
+                  "labelPageHeader": "V2 Hospital - Your Request",
+                  "sourceLocation": "SummaryView.html"
+              }
+     }
+}
