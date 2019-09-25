@@ -1,0 +1,850 @@
+<html>
+
+    <head>
+        <title></title>
+        <link rel="stylesheet" href="bootstrap.min.css">
+        <script type="text/javascript" src="KASClient.js"></script>
+        <script type="text/javascript" src="react.min.js"></script>
+        <script type="text/javascript" src="jquery.min.js"></script>
+        <link rel="stylesheet" href="datepicker.min.css" type="text/css">
+        <script type="text/javascript" src="datepicker.min.js"></script>
+        <script type="text/javascript" src="datepicker.en.js"></script>
+
+		<style>
+			.inline{
+				display:flex;
+				flex-direction:row;
+				justify-content:flex-start;
+			}
+			body{
+				background: url("bg_pattern.png");
+				background:cover;
+			}
+            ul>li{
+                margin-bottom: 10px;
+            }
+            .btn-primary{
+                background-color: #318A28 !important;
+                border: 1px solid #318A28 !important;
+            }
+            .btn-primary:hover{
+                color: #318A28 !important;
+                background-color: #5BED60 !important;
+            }
+            .greyontap{
+              padding:10px;
+            }
+            .greyontap:hover{
+              background-color: #f7f7f7;
+            }
+        </style>
+        <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBgIGTpI0EvG0jY_duu0WkopStFRjhK75g&libraries=places"></script>
+        <script>
+            var _form; // type: KASForm
+            var _myFormResponses; // type: KASFormResponse[]
+            var _data = JSON.parse("{}");
+            _data.requestType = "-1";
+            _data.fullname = "-1";
+            _data.passportNo = "-1";
+            _data.exitDate = "-1";
+            _data.reentryDate = "-1";
+            _data.date = "-1";
+            _data.employeeId = "-1";
+            _data.reason = "-1";
+            _data.photo = "-1";
+            _data.visaNo = "-1";
+            _data.issueDate = "-1";
+            _data.expiryDate = "-1";
+            _data.emojiCode = "-1";
+            _data.iqama = "-1";
+            _data.location = "N/A";
+            _data.country = '-1';
+
+
+            // current location
+
+            GetGeolocation();
+            function GetGeolocation() {
+
+            navigator.geolocation.getCurrentPosition(GetCoords);
+
+            }
+
+
+            function GetCoords(position){
+
+
+              var geocoder= new google.maps.Geocoder();
+              var latlng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+              geocoder.geocode({'latLng': latlng}, function(results, status) {
+                if (status == google.maps.GeocoderStatus.OK) {
+                  if (results[1]) {
+                  //  map.setZoom(11);
+                 //   marker = new google.maps.Marker({
+                   //     position: latlng,
+                     //   map: map
+                    //});
+                    _data.location = results[1].formatted_address;
+                    console.log(_data);
+                    // var address = document.getElementById("ecurrentlocaiton")
+                    // alert(results[1].formatted_address);
+                    setInterval((function(){
+                      document.getElementById("e-currentlocation").value = results[1].formatted_address;
+                    })(_data.location),1000);
+                    // address.value = results[1].formatted_address;
+
+                  }
+                } else {
+                  // alert("Geocoder failed due to: " + status);
+                }
+              });
+
+            }
+// current location
+
+            // Below will be called on onload of ResponseView.html
+            function onResponsePageLoad() {
+                KASClient.Form.getFormAsync(function (form, error) {
+                    if (error != null) {
+                        KASClient.App.showNativeErrorMessage("Error");
+                        return;
+                    }
+                    _form = form;
+
+                    // Document title would be the form title
+                    // document.getElementById("title").innerHTML = _form.title;
+
+                    KASClient.Form.getMyFormResponsesAsync(function (responses, error) {
+                        if (error != null) {
+                            KASClient.App.showNativeErrorMessage("Resource Fetch error");
+                            return;
+                        }
+                        _myFormResponses = responses;
+
+                        // Render previous response, if any
+                        if (isCurrentUserResponded()) {
+                        }
+                    });
+                });
+            }
+
+            function submitData() {
+                // var selectedOption = getSelectedOption();
+                // var remark = document.getElementById("description").value;
+                submitFormResponse(_data);
+            }
+
+            // Below will be called when responder submits a new response
+            function submitFormResponse(data) {
+                var status = true;
+                if (data == null || data == "") {
+                    KASClient.App.showNativeErrorMessage("Please fill remark");
+                    status = false;
+                }
+                if(data.requestType == 'LR'){
+                    if(data.fullname =='-1' || data.date == '-1' || data.employeeId == '-1' || data.reason == '-1' || data.photo == '-1'){
+                        KASClient.App.showNativeErrorMessage("Please fill all details to submit Leave-Request.");
+                        status = false;
+                    }
+                }
+                if(data.requestType == 'VR'){
+                    if(data.fullname == '-1' || data.iqama == '-1' || data.country == '-1' || data.issueDate == '-1' || data.expiryDate == '-1'){
+                        KASClient.App.showNativeErrorMessage("Please fill all details to submit Iqama-Request.");
+                        status = false;
+                    }
+                }
+                if(data.requestType == 'ER'){
+                    if(data.fullname == '-1' || data.passportNo == '-1' || data.exitDate == '-1' || data.reentryDate == '-1'){
+                        KASClient.App.showNativeErrorMessage("Please fill all details to submit Exit Re-entry.");
+                        status = false;
+                    }
+                }
+                if(status==true){
+                    // For submitting response a question-answer
+                    // map is required, lets create that!
+                    var questionToAnswerMap = JSON.parse("{}");
+                    // questionToAnswerMap[0] = selectedOption;
+                    // questionToAnswerMap[1] = remark;
+                    questionToAnswerMap[0] ="-1";
+                    questionToAnswerMap[1] ="-1";
+                    questionToAnswerMap[2] =_data.requestType;
+                    questionToAnswerMap[3] = _data.fullname;
+                    questionToAnswerMap[4] = _data.passportNo;
+                    questionToAnswerMap[5] = _data.exitDate;
+                    questionToAnswerMap[6] = _data.reentryDate;
+                    questionToAnswerMap[7] = _data.date;
+                    questionToAnswerMap[8] = _data.employeeId;
+                    questionToAnswerMap[9] = _data.reason;
+                    questionToAnswerMap[10] = _data.photo;
+                    questionToAnswerMap[11] = _data.visaNo;
+                    questionToAnswerMap[12] = _data.issueDate;
+                    questionToAnswerMap[13] = _data.expiryDate;
+                    questionToAnswerMap[14] = _data.emojiCode;
+                    questionToAnswerMap[15] = _data.iqama;
+                    questionToAnswerMap[16] = _data.location;
+                    questionToAnswerMap[17] = _data.country;
+
+                    var responseId = null;
+                    var isEditingPreviousResponse = false;
+
+                    // If there is a previous response, update it
+                    if (isCurrentUserResponded()) {
+                        responseId = _myFormResponses[0].id;
+                        isEditingPreviousResponse = true;
+                    }
+
+                    // Finally submit the response
+                    KASClient.Form.sumbitFormResponse(questionToAnswerMap, responseId, isEditingPreviousResponse, true);
+                }
+            }
+
+            function isCurrentUserResponded() {
+                return _myFormResponses && _myFormResponses.length > 0;
+            }
+        </script>
+    </head>
+
+    <body onload="onResponsePageLoad()">
+        <br/> <br/>
+        <!-- <div>
+            <h1 id="title" style="text-align: center;padding: 20px;">HR Systems</h1>
+        </div> -->
+        <div>
+            <br/> <br/>
+            <script type="text/javascript">
+
+            </script>
+            <div>
+                <div class="container">
+                    <div class="row" id="reset" style="margin-bottom: 20px;">
+                        <div class="col">
+                            <button class="btn btn-block btn-danger" onclick="(function(){hideAll();$('#choice').show();})()">RESET</button>
+                        </div>
+                    </div>
+                    <div class="row" id="choice">
+                        <div class="col">
+                            <div class="card" style="box-shadow: 0px 0px 7px #ccc;border:none;">
+                                <h1 class="card-header" style="text-align: center;border-bottom: none;background-color: #5BED60;">HR Systems</h1>
+                                <div class="card-body">
+                                    <p>Choose your Request:</p>
+                                    <ul style="list-style: none;margin-left: 0px;padding-left: 0px;">
+                                        <li><button onclick="showLeaveRequest()" class="btn btn-primary btn-block">Leave Request</button></li>
+                                        <li><button onclick="showVisaRequest()" class="btn btn-primary btn-block">Iqama Renewal</button></li>
+                                        <li><button onclick="showExitReentry()" class="btn btn-primary btn-block">Exit & Re-entry</button></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row" id="leave-request" style="margin-bottom: 20px;">
+                        <div class="col">
+                            <div class="card" style="box-shadow: 0px 0px 7px #ccc;border:none;">
+                                <h3 class="card-header" style="text-align: center;border-bottom: none;background-color: #5BED60;">Leave Request</h3>
+                                <div class="card-body">
+                                    <ul style="list-style: none;margin-left: 0px;padding-left: 0px;">
+                                       <div class="form-group">
+                                           <label for="l-full-name">Full Name</label>
+                                           <input class="form-control" oninput="(function(e){
+                                                _data.fullname = document.getElementById('l-full-name').value;
+                                                console.log(JSON.stringify(_data));
+                                            })()" type="text" id="l-full-name">
+                                       </div>
+                                       <div class="form-group">
+                                           <label for="l-date">Date</label>
+                                           <input class="form-control datepicker-here" data-language='en' oninput="(function(e){
+                                                _data.date = document.getElementById('l-date').value;
+                                                console.log(JSON.stringify(_data));
+                                            })()" type="text" id="l-date" readonly>
+                                       </div>
+                                       <div class="form-group">
+                                           <label for="l-employee-id">Employee ID</label>
+                                           <input class="form-control" oninput="(function(e){
+                                                _data.employeeId = document.getElementById('l-employee-id').value;
+                                                console.log(JSON.stringify(_data));
+                                            })()" type="text" id="l-employee-id">
+                                       </div>
+                                       <div class="form-group">
+                                           <label for="l-reason">Reason</label>
+                                           <select class="form-control" onchange="(function(e){
+                                           _data.reason = document.getElementById('l-reason').value;
+                                           console.log(JSON.stringify(_data));
+                                           })()" type="text" id="l-reason">
+                                             <option value="-1">Choose</option>
+                                             <option value="Sick">Sick</option>
+                                             <option value="Vacation">Vacation</option>
+                                             <option value="Travel">Travel</option>
+                                             <option value="Family Issue">Family Issue</option>
+                                             <option value="Governmental Activity">Governmental Activity</option>
+                                             <option value="Other">Other</option>
+                                           </select>
+                                       </div>
+                                       <div class="form-group">
+                                        <img src="" width="150" height="150" alt="Photo" id="thumbnail" style="margin-bottom: 20px;">
+                                           <button class="btn btn-block btn-light" id="l-photo">Choose Photo</button>
+                                       </div>
+                                       <div class="form-group">
+                                           <button class="btn btn-primary btn-block" onclick="showFeedBackForm()">SUBMIT</button>
+                                       </div>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row" id="visa-request" style="margin-bottom: 20px;">
+                        <div class="col">
+                            <div class="card" style="box-shadow: 0px 0px 7px #ccc;border:none;">
+                                <h3 class="card-header" style="text-align: center;border-bottom: none;background-color: #5BED60;">Iqama Request</h3>
+                                <div class="card-body">
+                                    <ul style="list-style: none;margin-left: 0px;padding-left: 0px;">
+                                       <div class="form-group">
+                                           <label for="v-full-name">Full Name</label>
+                                           <input class="form-control" oninput="(function(e){
+                                                _data.fullname = document.getElementById('v-full-name').value;
+                                                console.log(JSON.stringify(_data));
+                                            })()" type="text" id="v-full-name">
+                                       </div>
+                                        <div class="form-group">
+                                           <label for="v-iqama">Iqama Number</label>
+                                           <input class="form-control" oninput="(function(e){
+                                                _data.iqama = document.getElementById('v-iqama').value;
+                                                console.log(JSON.stringify(_data));
+                                            })()" type="text" id="v-iqama">
+                                       </div>
+                                       <div class="form-group">
+                                           <label for="v-country">Country</label>
+                                           <select class="form-control" oninput="(function(e){
+                                           _data.country = document.getElementById('v-country').value;
+                                           console.log(JSON.stringify(_data));
+                                         })()" type="text" id="v-country">
+                                           <option value="-1">Choose</option>
+                                            <option value="Afghanistan">Afghanistan</option>
+                                            <option value="Åland Islands">Åland Islands</option>
+                                            <option value="Albania">Albania</option>
+                                            <option value="Algeria">Algeria</option>
+                                            <option value="American Samoa">American Samoa</option>
+                                            <option value="Andorra">Andorra</option>
+                                            <option value="Angola">Angola</option>
+                                            <option value="Anguilla">Anguilla</option>
+                                            <option value="Antarctica">Antarctica</option>
+                                            <option value="Antigua and Barbuda">Antigua and Barbuda</option>
+                                            <option value="Argentina">Argentina</option>
+                                            <option value="Armenia">Armenia</option>
+                                            <option value="Aruba">Aruba</option>
+                                            <option value="Australia">Australia</option>
+                                            <option value="Austria">Austria</option>
+                                            <option value="Azerbaijan">Azerbaijan</option>
+                                            <option value="Bahamas">Bahamas</option>
+                                            <option value="Bahrain">Bahrain</option>
+                                            <option value="Bangladesh">Bangladesh</option>
+                                            <option value="Barbados">Barbados</option>
+                                            <option value="Belarus">Belarus</option>
+                                            <option value="Belgium">Belgium</option>
+                                            <option value="Belize">Belize</option>
+                                            <option value="Benin">Benin</option>
+                                            <option value="Bermuda">Bermuda</option>
+                                            <option value="Bhutan">Bhutan</option>
+                                            <option value="Bolivia">Bolivia</option>
+                                            <option value="Bosnia and Herzegovina">Bosnia and Herzegovina</option>
+                                            <option value="Botswana">Botswana</option>
+                                            <option value="Bouvet Island">Bouvet Island</option>
+                                            <option value="Brazil">Brazil</option>
+                                            <option value="British Indian Ocean Territory">British Indian Ocean Territory</option>
+                                            <option value="Brunei Darussalam">Brunei Darussalam</option>
+                                            <option value="Bulgaria">Bulgaria</option>
+                                            <option value="Burkina Faso">Burkina Faso</option>
+                                            <option value="Burundi">Burundi</option>
+                                            <option value="Cambodia">Cambodia</option>
+                                            <option value="Cameroon">Cameroon</option>
+                                            <option value="Canada">Canada</option>
+                                            <option value="Cape Verde">Cape Verde</option>
+                                            <option value="Cayman Islands">Cayman Islands</option>
+                                            <option value="Central African Republic">Central African Republic</option>
+                                            <option value="Chad">Chad</option>
+                                            <option value="Chile">Chile</option>
+                                            <option value="China">China</option>
+                                            <option value="Christmas Island">Christmas Island</option>
+                                            <option value="Cocos (Keeling) Islands">Cocos (Keeling) Islands</option>
+                                            <option value="Colombia">Colombia</option>
+                                            <option value="Comoros">Comoros</option>
+                                            <option value="Congo">Congo</option>
+                                            <option value="Congo, The Democratic Republic of The">Congo, The Democratic Republic of The</option>
+                                            <option value="Cook Islands">Cook Islands</option>
+                                            <option value="Costa Rica">Costa Rica</option>
+                                            <option value="Cote D'ivoire">Cote D'ivoire</option>
+                                            <option value="Croatia">Croatia</option>
+                                            <option value="Cuba">Cuba</option>
+                                            <option value="Cyprus">Cyprus</option>
+                                            <option value="Czech Republic">Czech Republic</option>
+                                            <option value="Denmark">Denmark</option>
+                                            <option value="Djibouti">Djibouti</option>
+                                            <option value="Dominica">Dominica</option>
+                                            <option value="Dominican Republic">Dominican Republic</option>
+                                            <option value="Ecuador">Ecuador</option>
+                                            <option value="Egypt">Egypt</option>
+                                            <option value="El Salvador">El Salvador</option>
+                                            <option value="Equatorial Guinea">Equatorial Guinea</option>
+                                            <option value="Eritrea">Eritrea</option>
+                                            <option value="Estonia">Estonia</option>
+                                            <option value="Ethiopia">Ethiopia</option>
+                                            <option value="Falkland Islands (Malvinas)">Falkland Islands (Malvinas)</option>
+                                            <option value="Faroe Islands">Faroe Islands</option>
+                                            <option value="Fiji">Fiji</option>
+                                            <option value="Finland">Finland</option>
+                                            <option value="France">France</option>
+                                            <option value="French Guiana">French Guiana</option>
+                                            <option value="French Polynesia">French Polynesia</option>
+                                            <option value="French Southern Territories">French Southern Territories</option>
+                                            <option value="Gabon">Gabon</option>
+                                            <option value="Gambia">Gambia</option>
+                                            <option value="Georgia">Georgia</option>
+                                            <option value="Germany">Germany</option>
+                                            <option value="Ghana">Ghana</option>
+                                            <option value="Gibraltar">Gibraltar</option>
+                                            <option value="Greece">Greece</option>
+                                            <option value="Greenland">Greenland</option>
+                                            <option value="Grenada">Grenada</option>
+                                            <option value="Guadeloupe">Guadeloupe</option>
+                                            <option value="Guam">Guam</option>
+                                            <option value="Guatemala">Guatemala</option>
+                                            <option value="Guernsey">Guernsey</option>
+                                            <option value="Guinea">Guinea</option>
+                                            <option value="Guinea-bissau">Guinea-bissau</option>
+                                            <option value="Guyana">Guyana</option>
+                                            <option value="Haiti">Haiti</option>
+                                            <option value="Heard Island and Mcdonald Islands">Heard Island and Mcdonald Islands</option>
+                                            <option value="Holy See (Vatican City State)">Holy See (Vatican City State)</option>
+                                            <option value="Honduras">Honduras</option>
+                                            <option value="Hong Kong">Hong Kong</option>
+                                            <option value="Hungary">Hungary</option>
+                                            <option value="Iceland">Iceland</option>
+                                            <option value="India">India</option>
+                                            <option value="Indonesia">Indonesia</option>
+                                            <option value="Iran, Islamic Republic of">Iran, Islamic Republic of</option>
+                                            <option value="Iraq">Iraq</option>
+                                            <option value="Ireland">Ireland</option>
+                                            <option value="Isle of Man">Isle of Man</option>
+                                            <option value="Israel">Israel</option>
+                                            <option value="Italy">Italy</option>
+                                            <option value="Jamaica">Jamaica</option>
+                                            <option value="Japan">Japan</option>
+                                            <option value="Jersey">Jersey</option>
+                                            <option value="Jordan">Jordan</option>
+                                            <option value="Kazakhstan">Kazakhstan</option>
+                                            <option value="Kenya">Kenya</option>
+                                            <option value="Kiribati">Kiribati</option>
+                                            <option value="Korea, Democratic People's Republic of">Korea, Democratic People's Republic of</option>
+                                            <option value="Korea, Republic of">Korea, Republic of</option>
+                                            <option value="Kuwait">Kuwait</option>
+                                            <option value="Kyrgyzstan">Kyrgyzstan</option>
+                                            <option value="Lao People's Democratic Republic">Lao People's Democratic Republic</option>
+                                            <option value="Latvia">Latvia</option>
+                                            <option value="Lebanon">Lebanon</option>
+                                            <option value="Lesotho">Lesotho</option>
+                                            <option value="Liberia">Liberia</option>
+                                            <option value="Libyan Arab Jamahiriya">Libyan Arab Jamahiriya</option>
+                                            <option value="Liechtenstein">Liechtenstein</option>
+                                            <option value="Lithuania">Lithuania</option>
+                                            <option value="Luxembourg">Luxembourg</option>
+                                            <option value="Macao">Macao</option>
+                                            <option value="Macedonia, The Former Yugoslav Republic of">Macedonia, The Former Yugoslav Republic of</option>
+                                            <option value="Madagascar">Madagascar</option>
+                                            <option value="Malawi">Malawi</option>
+                                            <option value="Malaysia">Malaysia</option>
+                                            <option value="Maldives">Maldives</option>
+                                            <option value="Mali">Mali</option>
+                                            <option value="Malta">Malta</option>
+                                            <option value="Marshall Islands">Marshall Islands</option>
+                                            <option value="Martinique">Martinique</option>
+                                            <option value="Mauritania">Mauritania</option>
+                                            <option value="Mauritius">Mauritius</option>
+                                            <option value="Mayotte">Mayotte</option>
+                                            <option value="Mexico">Mexico</option>
+                                            <option value="Micronesia, Federated States of">Micronesia, Federated States of</option>
+                                            <option value="Moldova, Republic of">Moldova, Republic of</option>
+                                            <option value="Monaco">Monaco</option>
+                                            <option value="Mongolia">Mongolia</option>
+                                            <option value="Montenegro">Montenegro</option>
+                                            <option value="Montserrat">Montserrat</option>
+                                            <option value="Morocco">Morocco</option>
+                                            <option value="Mozambique">Mozambique</option>
+                                            <option value="Myanmar">Myanmar</option>
+                                            <option value="Namibia">Namibia</option>
+                                            <option value="Nauru">Nauru</option>
+                                            <option value="Nepal">Nepal</option>
+                                            <option value="Netherlands">Netherlands</option>
+                                            <option value="Netherlands Antilles">Netherlands Antilles</option>
+                                            <option value="New Caledonia">New Caledonia</option>
+                                            <option value="New Zealand">New Zealand</option>
+                                            <option value="Nicaragua">Nicaragua</option>
+                                            <option value="Niger">Niger</option>
+                                            <option value="Nigeria">Nigeria</option>
+                                            <option value="Niue">Niue</option>
+                                            <option value="Norfolk Island">Norfolk Island</option>
+                                            <option value="Northern Mariana Islands">Northern Mariana Islands</option>
+                                            <option value="Norway">Norway</option>
+                                            <option value="Oman">Oman</option>
+                                            <option value="Pakistan">Pakistan</option>
+                                            <option value="Palau">Palau</option>
+                                            <option value="Palestinian Territory, Occupied">Palestinian Territory, Occupied</option>
+                                            <option value="Panama">Panama</option>
+                                            <option value="Papua New Guinea">Papua New Guinea</option>
+                                            <option value="Paraguay">Paraguay</option>
+                                            <option value="Peru">Peru</option>
+                                            <option value="Philippines">Philippines</option>
+                                            <option value="Pitcairn">Pitcairn</option>
+                                            <option value="Poland">Poland</option>
+                                            <option value="Portugal">Portugal</option>
+                                            <option value="Puerto Rico">Puerto Rico</option>
+                                            <option value="Qatar">Qatar</option>
+                                            <option value="Reunion">Reunion</option>
+                                            <option value="Romania">Romania</option>
+                                            <option value="Russian Federation">Russian Federation</option>
+                                            <option value="Rwanda">Rwanda</option>
+                                            <option value="Saint Helena">Saint Helena</option>
+                                            <option value="Saint Kitts and Nevis">Saint Kitts and Nevis</option>
+                                            <option value="Saint Lucia">Saint Lucia</option>
+                                            <option value="Saint Pierre and Miquelon">Saint Pierre and Miquelon</option>
+                                            <option value="Saint Vincent and The Grenadines">Saint Vincent and The Grenadines</option>
+                                            <option value="Samoa">Samoa</option>
+                                            <option value="San Marino">San Marino</option>
+                                            <option value="Sao Tome and Principe">Sao Tome and Principe</option>
+                                            <option value="Saudi Arabia">Saudi Arabia</option>
+                                            <option value="Senegal">Senegal</option>
+                                            <option value="Serbia">Serbia</option>
+                                            <option value="Seychelles">Seychelles</option>
+                                            <option value="Sierra Leone">Sierra Leone</option>
+                                            <option value="Singapore">Singapore</option>
+                                            <option value="Slovakia">Slovakia</option>
+                                            <option value="Slovenia">Slovenia</option>
+                                            <option value="Solomon Islands">Solomon Islands</option>
+                                            <option value="Somalia">Somalia</option>
+                                            <option value="South Africa">South Africa</option>
+                                            <option value="South Georgia and The South Sandwich Islands">South Georgia and The South Sandwich Islands</option>
+                                            <option value="Spain">Spain</option>
+                                            <option value="Sri Lanka">Sri Lanka</option>
+                                            <option value="Sudan">Sudan</option>
+                                            <option value="Suriname">Suriname</option>
+                                            <option value="Svalbard and Jan Mayen">Svalbard and Jan Mayen</option>
+                                            <option value="Swaziland">Swaziland</option>
+                                            <option value="Sweden">Sweden</option>
+                                            <option value="Switzerland">Switzerland</option>
+                                            <option value="Syrian Arab Republic">Syrian Arab Republic</option>
+                                            <option value="Taiwan, Province of China">Taiwan, Province of China</option>
+                                            <option value="Tajikistan">Tajikistan</option>
+                                            <option value="Tanzania, United Republic of">Tanzania, United Republic of</option>
+                                            <option value="Thailand">Thailand</option>
+                                            <option value="Timor-leste">Timor-leste</option>
+                                            <option value="Togo">Togo</option>
+                                            <option value="Tokelau">Tokelau</option>
+                                            <option value="Tonga">Tonga</option>
+                                            <option value="Trinidad and Tobago">Trinidad and Tobago</option>
+                                            <option value="Tunisia">Tunisia</option>
+                                            <option value="Turkey">Turkey</option>
+                                            <option value="Turkmenistan">Turkmenistan</option>
+                                            <option value="Turks and Caicos Islands">Turks and Caicos Islands</option>
+                                            <option value="Tuvalu">Tuvalu</option>
+                                            <option value="Uganda">Uganda</option>
+                                            <option value="Ukraine">Ukraine</option>
+                                            <option value="United Arab Emirates">United Arab Emirates</option>
+                                            <option value="United Kingdom">United Kingdom</option>
+                                            <option value="United States">United States</option>
+                                            <option value="United States Minor Outlying Islands">United States Minor Outlying Islands</option>
+                                            <option value="Uruguay">Uruguay</option>
+                                            <option value="Uzbekistan">Uzbekistan</option>
+                                            <option value="Vanuatu">Vanuatu</option>
+                                            <option value="Venezuela">Venezuela</option>
+                                            <option value="Viet Nam">Viet Nam</option>
+                                            <option value="Virgin Islands, British">Virgin Islands, British</option>
+                                            <option value="Virgin Islands, U.S.">Virgin Islands, U.S.</option>
+                                            <option value="Wallis and Futuna">Wallis and Futuna</option>
+                                            <option value="Western Sahara">Western Sahara</option>
+                                            <option value="Yemen">Yemen</option>
+                                            <option value="Zambia">Zambia</option>
+                                            <option value="Zimbabwe">Zimbabwe</option>
+                                           <option value="Other">Other</option>
+                                          </select>
+                                       </div>
+
+                                      
+                                       <div class="form-group">
+                                        <label for="Invoice_type">Invoice_type</label>
+                                        <input class="form-control " data-language='en' oninput="(function(e){
+                                             _data.issueDate = document.getElementById('Invoice_type').value;
+                                             console.log(JSON.stringify(_data));
+                                         })()" type="text" id="Invoice_type" >
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="cost">cost</label>
+                                            <input type="text" oninput="(function(e){
+                                                 _data.expiryDate = document.getElementById('cost').value;
+                                                 console.log(JSON.stringify(_data));
+                                             })()" class="form-control " data-language='en' id="cost" >
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="v-issue-date">Issue Date</label>
+                                            <input class="form-control datepicker-here" data-language='en' oninput="(function(e){
+                                                 _data.issueDate = document.getElementById('v-issue-date').value;
+                                                 console.log(JSON.stringify(_data));
+                                             })()" type="text" id="v-issue-date" readonly>
+                                        </div>
+                                       <div class="form-group">
+                                           <label for="v-expiry-date">Expiry Date</label>
+                                           <input type="text" oninput="(function(e){
+                                                _data.expiryDate = document.getElementById('v-expiry-date').value;
+                                                console.log(JSON.stringify(_data));
+                                            })()" class="form-control datepicker-here" data-language='en' id="v-expiry-date" readonly>
+                                       </div>
+                                       
+                                       <div class="form-group">
+                                           <button class="btn btn-primary btn-block" onclick="showFeedBackForm()">SUBMIT</button>
+                                       </div>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row" id="exit-request" style="margin-bottom: 20px;display: none;">
+                        <div class="col">
+                            <div class="card" style="box-shadow: 0px 0px 7px #ccc;border:none;">
+                                <h3 class="card-header" style="text-align: center;border-bottom: none;background-color: #5BED60;">Exit & Re-Entry</h3>
+                                <div class="card-body">
+                                    <ul style="list-style: none;margin-left: 0px;padding-left: 0px;">
+                                       <div class="form-group">
+                                           <label for="e-full-name">Full Name</label>
+                                           <input class="form-control" oninput="(function(e){
+                                                _data.fullname = document.getElementById('e-full-name').value;
+                                                console.log(JSON.stringify(_data));
+                                            })()" type="text" id="e-full-name">
+                                       </div>
+                                        <div class="form-group">
+                                           <label for="e-passport-no">Passport No.</label>
+                                           <input class="form-control" oninput="(function(e){
+                                                _data.passportNo = document.getElementById('e-passport-no').value;
+                                                console.log(JSON.stringify(_data));
+                                            })()" type="text" id="e-passport-no">
+                                       </div>
+                                       <div class="form-group">
+                                           <label for="e-exit-date">Exit Date</label>
+                                           <input class="form-control datepicker-here" type="text" data-language='en' id="e-exit-date" >
+                                       </div>
+
+                                       <div class="form-group">Re-entry Date</label>
+                                           <label for="e-reentry-date"></label>
+                                           <input class="form-control datepicker-here" type="text" data-language='en' id="e-reentry-date"
+                                           >
+                                       </div>
+
+                                       <div class="form-group">Current Location</label>
+                                        <label for="e-currentlocation"></label>
+                                        <input class="form-control" type="text" id="e-currentlocation" readonly>
+                                       </div>
+
+                                       <div class="form-group">
+                                           <button class="btn btn-primary btn-block" id="e-submit" onclick="showFeedBackForm()">SUBMIT</button>
+                                       </div>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row" id="feedback" style="margin-bottom: 20px;display: none;">
+                        <div class="col">
+                            <div class="card" style="box-shadow: 0px 0px 7px #ccc;border:none;">
+                                <h3 class="card-header" style="text-align: center;padding:10px;background-color: green;border-bottom: none;background-color: #5BED60;">Thank you for choosing us. Please rate by clicking your face expression.</h3>
+                                <div class="card-body">
+                                    <ul style="list-style: none;margin-left: 0px;padding-left: 0px;">
+                                       <li class="greyontap">
+                                         <div style="display: flex; flex-direction: row;align-items: center;" onclick="setEmoji(1)">
+                                           <img src='Eone.png' height='50' width="50" style="display: block;">
+                                           <p style="padding-left:20px;margin-top:15px;">EXTREMELY SATISFIED</p>
+                                         </div>
+                                       </li>
+                                       <li class="greyontap">
+                                         <div style="display: flex; flex-direction: horizontal;align-items: center;" onclick="setEmoji(2)">
+                                           <img src='Etwo.png' height='50' width="50" style="display: block;">
+                                           <p style="padding-left:20px;margin-top:15px;">SATISFIED</p>
+                                         </div>
+                                       </li>
+                                       <li class="greyontap">
+                                         <div style="display: flex; flex-direction: horizontal;align-items: center;" onclick="setEmoji(3)">
+                                           <img src='Ethree.png' height='50' width="50" style="display: block;">
+                                           <p style="padding-left:20px;margin-top:15px;">NEUTRAL</p>
+                                         </div>
+                                       </li>
+                                       <li class="greyontap">
+                                         <div style="display: flex; flex-direction: horizontal;align-items: center;" onclick="setEmoji(4)">
+                                           <img src='Efour.png' height='50' width="50" style="display: block;">
+                                           <p style="padding-left:20px;margin-top:15px;">UNSATISFIED</p>
+                                         </div>
+                                       </li>
+                                       <li class="greyontap">
+                                         <div style="display: flex; flex-direction: horizontal;align-items: center;" onclick="setEmoji(5)">
+                                           <img src='Efive.png' height='50' width="50" style="display: block;">
+                                           <p style="padding-left:20px;margin-top:15px;">EXTREMELY UNSATISFIED</p>
+                                         </div>
+                                       </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <br/> <br/>
+            <div>
+        </div>
+        <script type="text/javascript">
+        
+        // function warning(){ 
+        //      alert("ds");
+        //            var exit-date , re-entry-date;
+        //            exit-date = document.getElementById("e-exit-date").value;
+        //            re-entry-date = document.getElementById("e-reentry-date").value;
+        //            alert(exit-date);
+        //         }
+        
+        </script>
+        <script type="text/javascript">
+
+         
+                function getBase64(file){
+                    let reader = new FileReader();
+                    let fileData='';
+                    reader.readAsDataURL(file);
+                    reader.onload = function(){
+                        _data.photo = reader.result;
+                    }
+                    reader.onerror = function(e){
+                        _data.photo = '';
+                    }
+                }
+
+                function hideAll(){
+                    $('#leave-request').hide();
+                    $('#visa-request').hide();
+                    $('#exit-request').hide();
+                    $('#reset').hide();
+                }
+               
+
+                function showLeaveRequest(){
+                    _data.requestType = "LR";
+                    $('#choice').hide();
+                    $('#leave-request').show(3);
+                    $('#reset').show(3);
+                }
+
+                function showVisaRequest(){
+                    _data.requestType = "VR";
+                    _data.photo="";
+                    $('#choice').hide();
+                    $('#visa-request').show(3);
+                    $('#reset').show(3);
+                }
+
+                function showExitReentry(){
+                    _data.requestType = "ER";
+                    _data.photo="";
+                    $('#choice').hide();
+                    $('#exit-request').show(3);
+                    $('#reset').show(3);
+                }
+
+                function showFeedBackForm(){
+                    _data.exitDate = document.getElementById('e-exit-date').value;
+                    _data.reentryDate = document.getElementById('e-reentry-date').value;
+                    if ( (new Date(new Date(_data.reentryDate).getTime() - new Date(_data.exitDate).getTime()).getTime()) >= 2592000000)
+                        {    window.confirm( "You Exceeded 30 days! please select date again!!!");}
+                   else{
+                            hideAll();
+                            $('#feedback').show(3);
+                   }
+                }
+
+                function reset(){
+                    _data.photo = "";
+                    hideAll();
+                    $('#choice').show();
+                }
+
+                function setEmoji(code){
+                  _data.emojiCode = code;
+                  submitData();
+                }
+
+                hideAll();
+                
+                // let re-entry-date;
+                document.getElementById('v-issue-date').addEventListener('focusout',function(){
+                    _data.issueDate = document.getElementById('v-issue-date').value;
+                });
+                document.getElementById('v-expiry-date').addEventListener('focusout',function(){
+                    _data.expiryDate = document.getElementById('v-expiry-date').value;
+                });
+                document.getElementById('e-exit-date').addEventListener('focusout',function(){
+                    _data.exitDate = document.getElementById('e-exit-date').value;
+                    // exit-date =  document.getElementById('e-exit-date').value;
+                });
+                document.getElementById('e-reentry-date').addEventListener('focusout',function(){
+                    // _data.exitDate = document.getElementById('e-exit-date').value;
+                    // _data.reentryDate = document.getElementById('e-reentry-date').value;
+                  //if (_data.reentryDate != ""){/
+                    //    if ( (new Date(new Date(_data.reentryDate).getTime() - new Date(_data.exitDate).getTime()).getTime()) >= 2592000000)
+                    //         window.confirm( "You Exceeded 30 days! please select date again!!!");
+                      // }else{
+                          // document.getElementById('e-reentry-date').val("");
+                  // }
+                });
+                document.getElementById('l-date').addEventListener('focusout',function(){
+                    _data.date = document.getElementById('l-date').value;
+
+                });
+                document.getElementById('l-photo').addEventListener('click',function(){
+                    // KASClient.App.showImagePickerAsync(function(selectedImagePath,error){
+                    //     if(error != null){
+                    //         KASClient.App.showNativeErrorMessage("Please select a valid photo");
+                    //     }else{
+                    //         // KASClient.App.showNativeErrorMessage(JSON.stringify(selectedImagePath));
+
+                    //         KASClient.App.generateBase64ThumbnailAsync(selectedImagePath, function (thumbnail, error) {
+                    //             if (error == null && thumbnail != null) {
+                    //             //use the thumbnail data and update required dom
+                    //                 _data.photo = 'data:image/png;base64,'+thumbnail;
+                    //                 document.getElementById("thumbnail").src = 'data:image/png;base64,'+thumbnail;
+                    //                 $('#thumbnail').show();
+                    //                 _data.photo = selectedImagePath;
+                    //             }
+                    //         });
+
+                    //     }
+                    // })
+                    var props = JSON.parse('{}');
+                    props[KASClient.KASAttachmentListQuestionConfig.MAX_IMAGE_COUNT_KEY]=1;
+
+                    KASClient.App.showAttachmentPickerAsync([KASClient.KASAttachmentType.Image],props,function(selectedAttachments,error){
+                        if (error != null) {
+                      return;
+                        }
+                        if (selectedAttachments && selectedAttachments.length > 0) {
+                            var selectedImagePath = selectedAttachments[0].localPath;
+                            KASClient.App.generateBase64ThumbnailAsync(selectedImagePath, function (thumbnail, error) {
+                                if (error == null && thumbnail != null) {
+                                //use the thumbnail data and update required dom
+                                    _data.photo = 'data:image/png;base64,'+thumbnail;
+                                    document.getElementById("thumbnail").src = 'data:image/png;base64,'+thumbnail;
+                                    $('#thumbnail').show();
+                                    _data.photo = selectedImagePath;
+                                }
+                            });
+                        }
+                        })
+                })
+        </script>
+    </body>
+
+    </html>
+    `````

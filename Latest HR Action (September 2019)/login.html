@@ -1,0 +1,258 @@
+<html>
+  <head>
+      <title>Login</title>
+          <style>
+      .inline{
+        display:flex;
+        flex-direction:row;
+        justify-content:flex-start;
+      }
+      body{
+        background: url("bg_pattern.png");
+
+/*background:cover;*/
+/*        color:#ffffff;
+*/      }
+    </style>
+      <link rel="stylesheet" href="bootstrap.min.css">
+      <script type="text/javascript" src="KASClient.js"></script>
+      <script type="text/javascript">
+
+
+          // Globals
+          var _form; // type: KASForm
+          var _myFormResponses; // type: KASFormResponse[]
+          var _formSummary; // type: KASFormFlatSummary
+          var _users; // type: Dictionary<UserId: KASUser>
+
+          // Below will be called on onload of SummaryView.html
+
+          var two = "";
+          var _data = 'yolo';
+          function onSummaryPageLoad() {
+              KASClient.Form.getFormAsync(function (form, error) {
+                 if (error != null) {
+                    KASClient.App.showNativeErrorMessage("Error:getFormAsync:" + error);
+                    return;
+                 }
+                 _form = form;
+                 KASClient.App.showProgressBar("Fetching summary");
+                 KASClient.Form.getFormSummaryAsync(
+                    function (flatSummary, processedSummary, error) { // In this callback data is fetched from local database
+                       if (error != null) {
+                          KASClient.App.showNativeErrorMessage("Error:getFormSummaryAsync:callback1:" + error);
+                          return;
+                       }
+                       onGetSummary(flatSummary);
+                    },
+                    function (flatSummary, processedSummary, error) { // In this callback data is fetched from server
+                       KASClient.App.hideProgressBar();
+                       if (error != null) {
+                          KASClient.App.showNativeErrorMessage("Error:getFormSummaryAsync:callback2:" + error);
+                          return;
+                       }
+                       onGetSummary(flatSummary);
+                    }
+                 );
+              });
+           }
+
+           function onGetSummary(summary) {
+              _formSummary = summary;
+              KASClient.App.getUsersDetailsAsync(_formSummary.getRespondedUserIds(), function (users,
+                 error) {
+                 if (error != null) {
+                    KASClient.App.showNativeErrorMessage("Error:getUsersDetailsAsync:" + error);
+                    return;
+                 }
+                 _users = users;  // Document title would be the form title
+
+                 document.getElementById("title").innerHTML = _form.title;
+                 for(userId in _users){
+                  var data = _formSummary.getResponsesForUserId(userId);
+                  _data = _formSummary.getResponsesForUserId(userId);
+                   document.getElementById('feedback').innerHTML = generateEmoji(parseInt(data[14][0]));
+                //   alert(data);
+                //   alert(generateCard(data));
+                  document.getElementById('xcontent').innerHTML = generateCard(data);
+                  document.getElementById('pic').src = data['10'][0];
+                 }
+                 // Get all responses of the user, and find the average
+              });
+           }
+
+           function getImage(code){
+            switch(code){
+              case 5:
+                return 'Efive.png';
+              case 4:
+                return 'Efour.png';
+              case 3:
+                return 'Ethree.png';
+              case 2:
+                return 'Etwo.png';
+              case 1:
+                return 'Eone.png';
+            }
+           }
+
+           function generateEmoji(code){
+            var template = `<img src='${getImage(code)}' width='50' height='50'>`;
+            return template;
+           }
+
+           function generateCard(data){
+            var template = "";
+            // switch(data['2'][0]){
+              if(data['2'][0] == "LR"){
+                template = `<div class="row" id="leave-request" style="margin-bottom: 20px;">
+                        <div class="col">
+                            <div class="card" style="box-shadow: 0px 0px 7px #ccc;border:none;">
+                                <h3 class="card-header" style="text-align: center;border-bottom: none;background-color: #fff;">Leave Request</h3>
+                                <div class="card-body">
+                                    <ul style="list-style: none;margin-left: 0px;padding-left: 0px;">
+                                       <div class="form-group">
+                                           <label for="l-full-name">Full Name</label>
+                                           <input class="form-control" value='${data['3'][0]}' type="text" id="l-full-name" readonly>
+                                       </div>
+                                       <div class="form-group">
+                                           <label for="l-date">Date</label>
+                                           <input class="form-control" value='${data['7'][0]}' type="text" id="l-date" readonly>
+                                       </div>
+                                       <div class="form-group">
+                                           <label for="l-employee-id">Employee ID</label>
+                                           <input class="form-control" value='${data['8'][0]}' type="text" id="l-employee-id" readonly>
+                                       </div>
+                                       <div class="form-group">
+                                           <label for="l-reason">Reason</label>
+                                           <input class="form-control" value='${data['9'][0]}' type="text" id="l-reason" readonly>
+                                       </div>
+                                       <div class="form-group">
+                                           <label for="l-photo">Photo</label>
+                                           <img src='${data['10'][0]}' width='150' height='150' id="pic">
+                                       </div>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>`;
+                }
+                    // break;
+              if(data['2'][0] == "VR"){
+                template = `<div class="row" id="visa-request" style="margin-bottom: 20px;">
+                        <div class="col">
+                            <div class="card" style="box-shadow: 0px 0px 7px #ccc;border:none;">
+                                <h3 class="card-header" style="text-align: center;border-bottom: none;background-color: #fff;">Iqama Request</h3>
+                                <div class="card-body">
+                                    <ul style="list-style: none;margin-left: 0px;padding-left: 0px;">
+                                       <div class="form-group">
+                                           <label for="v-full-name">Full Name</label>
+                                           <input class="form-control" value='${data['3'][0]}' type="text" id="v-full-name" readonly>
+                                       </div>
+                                       <div class="form-group">
+                                           <label for="v-iqama">Iqama No.</label>
+                                           <input class="form-control" value='${data['15'][0]}' type="text" id="v-iqama" readonly>
+                                       </div>
+
+                                       <div class="form-group">
+                                           <label for="l-country">Country</label>
+                                           <input class="form-control" value='${data['17'][0]}' type="text" id="l-country" readonly>
+                                       </div>
+
+                                       <div class="form-group">
+                                           <label for="v-issue-date">Issue Date</label>
+                                           <input class="form-control" value='${data['12'][0]}' type="text" id="v-issue-date" readonly>
+                                       </div>
+                                       <div class="form-group">
+                                           <label for="v-expiry-date">Expiry Date</label>
+                                           <input type="text" value='${data['13'][0]}' class="form-control" id="v-expiry-date" readonly>
+                                       </div>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>`;
+                   }   // break;
+              if(data['2'][0] == "ER"){
+                template = `<div class="row" id="exit-request" style="margin-bottom: 20px;">
+                        <div class="col">
+                            <div class="card" style="box-shadow: 0px 0px 7px #ccc;border:none;">
+                                <h3 class="card-header" style="text-align: center;border-bottom: none;background-color: #fff;">Exit & Re-Entry</h3>
+                                <div class="card-body">
+                                    <ul style="list-style: none;margin-left: 0px;padding-left: 0px;">
+                                       <div class="form-group">
+                                           <label for="e-full-name">Full Name</label>
+                                           <input class="form-control" value='${data['3'][0]}' type="text" id="e-full-name" readonly>
+                                       </div>
+                                        <div class="form-group">
+                                           <label for="e-passport-no">Passport No.</label>
+                                           <input class="form-control" value='${data['4'][0]}' type="text" id="e-passport-no" readonly>
+                                       </div>
+                                       <div class="form-group">
+                                           <label for="e-exit-date">Exit Date</label>
+                                           <input class="form-control" value='${data['5'][0]}' type="text" id="e-exit-date" readonly>
+                                       </div>
+
+                                       <div class="form-group">Re-entry Date</label>
+                                           <label for="e-reentry-date"></label>
+                                           <input class="form-control" value='${data['6'][0]}' type="text" id="e-reentry-date" readonly>
+                                       </div>
+
+                                      <div class="form-group">Current Location</label>
+                                        <label for="e-currentlocation"></label>
+                                        <input class="form-control" type="text" id="e-currentlocation" value='${data['16'][0]}' readonly>
+                                      </div>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>`;
+                    }
+                        // break;
+
+            return template;
+           }
+      </script>
+  </head>
+
+  <body onload="onCreatePageLoad()" > 
+    <br/> <br/> 
+    
+    <div> 
+        <p>please enter your ID:</p> 
+        <br/> <br/> 
+        <input type="text" name="description" id="description" placeholder="Enter your Id" value=""> 
+    </div> 
+    <br/> <br/> 
+    <div> 
+        <input type="submit" name="Login" value="Login" onclick="submitData()" style="border:1px solid black;border-radius: 100%;height: 50px;width: 50px;background:rgb(3, 61, 83);"> 
+    </div> 
+</body> 
+
+  </html>
+  <script type="text/javascript"> 
+    var _form; // type: KASForm
+
+    // Below will be called on onload of CreationView.html 
+    function onCreatePageLoad() { 
+        KASClient.Form.initFormAsync (function (form, error) { 
+            if (error != null) { 
+                showAlert("Error:initFormAsync:" + error); 
+                return; 
+            } 
+            _form = form; 
+        }); 
+    } 
+
+    function submitData() {
+        var description = document.getElementById("description").value; 
+        if (description == null || description == "") { 
+            KASClient.App.showNativeErrorMessage("Please enter the Id."); 
+        } else { 
+            // Set the description to form title 
+            _form.title = description; 
+
+            // Finally send the request 
+            KASClient.Form.submitFormRequest(_form); 
+        } 
+    } 
+</script>

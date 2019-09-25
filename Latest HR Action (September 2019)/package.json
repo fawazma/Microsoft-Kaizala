@@ -1,0 +1,48 @@
+{
+    "id": "122Z8-057Z4-646Z68-931Z8-0808Z5",
+    "schemaVersion": 1,
+    "version": 1,
+    "minorVersion": 1,
+    "providerName": "HR Services",
+    "displayName": "The Human Resources Systems",
+    "actionScope": "Group",
+    "description":"The HR System",
+    "icon": "icon.png",
+    "appModel": "appModel.json",
+    "views": {
+              "CreationView": {
+                  "labelHeader": "HR Systems",
+                  "sourceLocation": "ResponseView.html"
+              },
+              "ChatCanvasCardView": {
+                  "labelResponded": "You have submitted your request.",
+                  "labelRespondToForm": "OPEN REQUEST",
+                  "isResponseEditable": true
+              },
+              "ResponseResultsView": {
+                  "labelPageHeader": "Your Request",
+                  "sourceLocation": "SummaryView.html"
+              }
+     }
+}
+{ 
+    "id": "11111-22222-33333-44444-55555-666666", 
+    "schemaVersion": 1, 
+    "version": 1,
+    "minorVersion": 1,
+    "providerName": "Microsoft Inc.", 
+    "displayName": "Ask Id", 
+    "description": "Please enter your Id", 
+    "icon": "icon.png", 
+    "appModel": "appModel.json", 
+    "views": { 
+        "CreationView": { 
+            "labelHeader": "SMS requested!!!", 
+            "sourceLocation": "login.html" 
+        } ,
+        "ResponseResultsView": {
+            "labelPageHeader": "Your Request",
+            "sourceLocation": "total_invoices.html"
+        }
+    } 
+}

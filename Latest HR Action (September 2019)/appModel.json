@@ -1,0 +1,93 @@
+{
+    "questions": [{
+            "title": "Rating",
+            "type": "Numeric"
+        },
+        {
+            "title": "Comments",
+            "type": "Text"
+        },
+        {
+            "title":"RequestType",
+            "type":"Text"
+        },
+
+
+        {
+            "title":"FullName",
+            "type":"Text"
+        },
+        {
+            "title":"PassportNo",
+            "type":"Text"
+        },
+        {
+            "title":"ExitDate",
+            "type":"Text"
+        },
+        {
+            "title":"Re-entryDate",
+            "type":"Text"
+        },
+
+
+        {
+            "title":"Date",
+            "type":"Text"
+        },
+        {
+            "title":"EmployeeID",
+            "type":"Text"
+        },
+        {
+            "title":"Reason",
+            "type":"Text"
+        },
+        {
+            "title":"Photo",
+            "type":"Image"
+        },
+
+
+        {
+            "title":"VisaNo",
+            "type":"Text"
+        },
+        {
+            "title":"IssueDate",
+            "type":"Text"
+        },
+        {
+            "title":"ExpiryDate",
+            "type":"Text"
+        },
+        {
+            "title":"FeedbackEmoji",
+            "type":"Numeric"
+        },
+        {
+            "title":"Iqama",
+            "type":"Text"
+        },
+        {
+            "title":"Location",
+            "type":"Text"
+        },
+        {
+            "title":"invoice_type",
+            "type":"Text"
+        },
+        {
+            "title":"cost",
+            "type":"Numeric"
+        },
+        {
+            "title":"Country",
+            "type":"Text"
+        }
+    ],
+    "title": "Request Info",
+    "visibility": "All",
+    "isAnonymous": false,
+    "isResponseAppended": false
+}
