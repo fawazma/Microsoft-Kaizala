@@ -1,0 +1,29 @@
+<div class="centerDiv">
+    <div class="container ">
+        <div style="text-align:center">
+            <input class="btn btn-primary btnWidth" id="_addInvoiceBtn" value="Add Invoice">
+        </div>
+
+        <div style="text-align:center;margin-top:20px">
+            <input class="btn btn-primary btnWidth" id="_showInvoicesBtn" value="Show Invoices">
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+
+    $(function () {
+        $(document).ready(function () {
+            $("#_addInvoiceBtn").click(AddInvoice);
+            $("#_showInvoicesBtn").click(ShowInvoices);
+
+            function ShowInvoices() {
+                $.router.go("showinvoices");
+            }
+
+            function AddInvoice() {
+                $.router.go("addinvoice");
+            }
+        });
+    })
+</script>

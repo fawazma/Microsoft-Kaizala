@@ -1,0 +1,38 @@
+{
+  "id": "19344-c9463-43247-b43de-4d7b0",
+  "schemaVersion": 1,
+  "version": 1,
+  "minorVersion": 41,
+  "actionScope": "Group",
+  "providerName": "HR Services",
+  "displayName": "Expense",
+  "description": "Custom action for Expense.",
+  "icon": "icon.png",
+  "appModel": "appModel.json",
+  "externalUrls": [
+    {
+      "url": "https://prod-10.westus.logic.azure.com:443/"
+    },
+    {
+      "url": "https://prod-31.westus.logic.azure.com:443/"
+    },
+    {
+      "url": "https://prod-58.westus.logic.azure.com:443/"
+    },
+    {
+      "url": "https://prod-69.westus.logic.azure.com:443/"
+    },
+    {
+      "url": "https://cdn.datatables.net/"
+    },
+    {
+      "url": "https://maps.googleapis.com/"
+    }
+  ],
+  "views": {
+    "CreationView": {
+      "labelHeader": "Expense",
+      "sourceLocation": "index.html"
+    }
+  }
+}

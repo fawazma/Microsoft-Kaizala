@@ -1,0 +1,80 @@
+<div class="centerDiv" style="margin-top:65%">
+    <div class="container">
+        <table id="invoiceDetails" style="width:100%" class="table table-responsive table-bordered table-striped table-hover">
+        </table>
+    </div>
+</div>
+
+
+<script type="text/javascript">
+
+    $(function () {
+        $(document).ready(function () {
+
+            var invoiceTable = $('#invoiceDetails').DataTable({
+                responsive: true,
+                columns: [
+                    { title: "Name", data: "Name" },
+                    { title: "Country", data: "Country" },
+                    { title: "Project", data: "Project" },
+                    { title: "Invoice Type", data: "Invoice_x0020_Type" },
+                    { title: "Cost", data: "Cost" },
+                    { title: "Currency", data: "Currency", visible: false, },
+                    { title: "Location", data: "Location" }
+                ],
+            });
+
+            var getInvoicesUrl = "https://prod-58.westus.logic.azure.com:443/workflows/ed7674d9b5684ffb8cfe4da1a653785b/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=rtSWYDI2zxnXS7_WBv5dM-DCEJZ-oVCDojX13U_d_sk";
+
+            getInvoiceData();
+
+            function getInvoiceData() {
+
+                KASClient.App.showProgressBar("Please Wait..");
+
+                var parametersJson = JSON.stringify({ "method": "GET" });
+                KASClient.App.performHTTPRequest(getInvoicesUrl, parametersJson, function (response, error) {
+
+                    KASClient.App.hideProgressBar();
+
+                    if (!error) {
+
+                        var responseObj = JSON.parse(response);
+
+                        if (responseObj.HttpErrorMessage) {
+                            KASClient.App.showNativeErrorMessage("Cannot connect to host.");
+                        }
+                        else {
+                            var responseBody = JSON.parse(responseObj.HttpResponseBody);
+                            var invoiceList = responseBody.value;
+
+                            if (invoiceList.length > 0) {
+                                var invocies = invoiceList.filter(function (item) {
+                                    return item.UserId == sessionStorage.getItem("UserId");
+                                });
+
+
+
+
+                                if (invocies.length > 0) {
+
+                                    invocies.forEach(function (item, index) {
+                                        item.Cost = item.Cost + " " + item.Currency;
+                                    });
+
+                                    invoiceTable.clear().draw();
+                                    invoiceTable.rows.add(invocies); // Add new data
+                                    invoiceTable.draw(); // Redraw the DataTable
+                                }
+                            }
+                        }
+                    }
+                    else {
+                        KASClient.App.showNativeErrorMessage("Internal Server Error.");
+                    }
+                });
+            }
+
+        });
+    })
+</script>

@@ -1,0 +1,78 @@
+<div class="centerDiv">
+    <div class="container ">
+        <div class="form-group">
+            <label class="bold">Enter Your Id </label>
+            <input class="form-control" id="_userId" />
+        </div>
+
+        <div style="text-align:center">
+            <input class="btn btn-primary btnWidth" id="_loginBtn" type="submit" name="submit" value="Log In">
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+
+    $(function () {
+        $(document).ready(function () {
+
+            var getUsersUrl = "https://prod-31.westus.logic.azure.com:443/workflows/3a8ea78859634b10953612d4456c7fec/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=LlS_zWoBXGoGn_gFsjiZdWFg7i7Jitebw650sIZu2XM";
+
+            $("#_loginBtn").click(login);
+
+            function login() {
+                var userId = document.getElementById("_userId").value;
+                if (userId == null || userId == "") {
+                    KASClient.App.showNativeErrorMessage("Please enter Id.");
+                } else {
+                    getUsers(userId);
+                }
+            }
+
+            function getUsers(userId) {
+
+                KASClient.App.showProgressBar("Please Wait..");
+
+                var parametersJson = JSON.stringify({ "method": "GET" });
+                KASClient.App.performHTTPRequest(getUsersUrl, parametersJson, function (response, error) {
+
+                    KASClient.App.hideProgressBar();
+
+                    if (!error) {
+
+                        var responseObj = JSON.parse(response);
+
+                        if (responseObj.HttpErrorMessage) {
+                            KASClient.App.showNativeErrorMessage("Cannot connect to host.");
+                        }
+                        else {
+                            var responseBody = JSON.parse(responseObj.HttpResponseBody);
+
+                            var usersList = responseBody.value;
+
+                            if (usersList.length > 0) {
+
+                                var user = usersList.filter(function (item) {
+                                    return item.UserId == userId;
+                                });
+
+                                if (user.length > 0) {
+                                    sessionStorage.setItem("UserId", userId);
+                                    sessionStorage.setItem("UserMobile", user[0].Mobile);
+
+                                    $.router.go("otp");
+                                }
+                                else {
+                                    KASClient.App.showNativeErrorMessage("Invalid Id.");
+                                }
+                            }
+                        }
+                    }
+                    else {
+                        KASClient.App.showNativeErrorMessage("Internal Server Error.");
+                    }
+                });
+            }
+        });
+    })
+</script>

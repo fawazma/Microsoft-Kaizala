@@ -1,0 +1,37 @@
+
+.appBackgroundImg {
+    background: url("bg_pattern.png") no-repeat;
+    -webkit-background-size: cover;
+    -moz-background-size: cover;
+    -o-background-size: cover;
+    background-size: cover;
+}
+
+
+.centerFlex {
+    align-items: center;
+    display: flex;
+    justify-content: center;
+}
+
+
+.centerDiv {
+    padding: 15px;
+    position: absolute;
+    top: 30%;
+    left: 50%;
+    width: -webkit-fill-available;
+    -ms-transform: translateX(-50%) translateY(-50%);
+    -webkit-transform: translate(-50%,-50%);
+    transform: translate(-50%,-50%);
+}
+
+
+.bold {
+    font-weight: 900;
+}
+
+.btnWidth
+{
+    width:150px;
+}

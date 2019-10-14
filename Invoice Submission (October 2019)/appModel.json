@@ -1,0 +1,16 @@
+{
+  "questions": [
+    {
+      "title": "Id",
+      "type": "Numeric"
+    },
+    {
+      "title": "Code",
+      "type": "Numeric"
+    }
+  ],
+  "title": "Expence Action",
+  "visibility": "All",
+  "isAnonymous": false,
+  "isResponseAppended": false
+} 

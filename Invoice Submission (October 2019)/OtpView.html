@@ -1,0 +1,72 @@
+<div class="centerDiv">
+    <div class="container ">
+        <div class="form-group">
+            <label class="bold">Type the sms code we have sent to your phone</label>
+            <input class="form-control" id="_otp" />
+        </div>
+
+        <div style="text-align:center">
+            <input class="btn btn-primary btnWidth" id="_otpBtn" type="submit" name="submit" value="Continue">
+        </div>
+
+        <div style="text-align:center;margin-top:20px">
+            <input class="btn btn-primary btnWidth" id="_otpSendbtn" value="Resend Code">
+        </div>
+
+    </div>
+</div>
+
+<script type="text/javascript">
+
+    $(function () {
+        $(document).ready(function () {
+
+            var otpUrl = "https://prod-69.westus.logic.azure.com:443/workflows/697291a6788f4fdfab06394ed0b1a230/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=wHvbMYwxDKgUlZkeSRs0fXe7EhBxDnPmJ7XBv7QjFWg";
+
+            var otpSent = generateOtp();
+
+            sendOtp();
+
+            $("#_otpSendbtn").click(sendOtp);
+
+            $("#_otpBtn").click(otpSubmit);
+
+            function otpSubmit() {
+                var otp = document.getElementById("_otp").value;
+                if (!otp || (otp && otp != otpSent)) {
+                    KASClient.App.showNativeErrorMessage("Please enter sms code we have sent to your phone.");
+                } else {
+                    $.router.go("dashboard");
+                }
+            }
+
+            function generateOtp() {
+                return Math.floor(Math.random() * 899999 + 100000);
+            }
+
+            function sendOtp() {
+
+                KASClient.App.showProgressBar("Please Wait..");
+
+                var parametersJson = JSON.stringify({ "method": "POST", requestHeaders: { "Content-Type": "application/json" }, requestBody: JSON.stringify({ "Message": "Your code for login is " + otpSent, "Mobile": sessionStorage.getItem("UserMobile") }) });
+
+                KASClient.App.performHTTPRequest(otpUrl, parametersJson, function (response, error) {
+
+                    KASClient.App.hideProgressBar();
+
+                    if (!error) {
+
+                        var responseObj = JSON.parse(response);
+
+                        if (responseObj.HttpErrorMessage) {
+                            KASClient.App.showNativeErrorMessage("Cannot connect to host.");
+                        }
+                    }
+                    else {
+                        KASClient.App.showNativeErrorMessage("Internal Server Error.");
+                    }
+                });
+            }
+        })
+    })
+</script>
