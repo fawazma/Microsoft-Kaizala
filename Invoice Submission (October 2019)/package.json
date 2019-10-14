@@ -4,7 +4,7 @@
   "version": 1,
   "minorVersion": 41,
   "actionScope": "Group",
-  "providerName": "HR Services",
+  "providerName": "Financial Services",
   "displayName": "Expense",
   "description": "Custom action for Expense.",
   "icon": "icon.png",
