@@ -13,7 +13,7 @@ Fawaz Bukhowa
 ## Instructions:
 In MS Kaizala actions, you need to add KASClient.js to your directory. It can be downloaded from the portal.<br/>
 
-### Import:
+### How to import:
 1- Login at https://manage.kaiza.la/Account/MoreDetails and create an account for your Kaizala workspace.<br/>
 2- On the left side, click "Extensions".<br/>
 3- Then, click "Import".<br/>
